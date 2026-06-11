@@ -3,6 +3,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/pyfish?color=green)](https://pypi.org/project/pyfish/)
 [![Conda](https://img.shields.io/conda/v/bioconda/pyfish?color=green)](https://anaconda.org/bioconda/pyfish)
+[![Downloads](https://img.shields.io/pypi/dm/pyfish?color=green)](https://pypi.org/project/pyfish/)
 [![Tests](https://github.com/ICCB-Cologne/PyFish/actions/workflows/tests.yml/badge.svg)](https://github.com/ICCB-Cologne/PyFish/actions/workflows/tests.yml)
 
 PyFish is a Python 3 package for creation of [Fish (Muller) plots](https://en.wikipedia.org/wiki/Muller_plot) like the one below.
