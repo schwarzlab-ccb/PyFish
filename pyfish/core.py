@@ -81,6 +81,39 @@ def _create_ordering_centered(cur_tree, cur_clone):
     return res
 
 
+def _match_columns(df, expected, name):
+    """Ensure ``df`` exposes the ``expected`` columns.
+
+    ``expected`` is a list where each entry is a tuple of acceptable names for a
+    column, the first of which is canonical. Name matching is case-insensitive.
+    If every column can be matched by name, the columns are renamed to their
+    canonical form. Otherwise the first columns are mapped by position onto the
+    canonical names and the chosen mapping is reported.
+    """
+    canonical = [aliases[0] for aliases in expected]
+    lower_to_actual = {str(c).lower(): c for c in df.columns}
+
+    mapping = {}
+    for aliases in expected:
+        for alias in aliases:
+            actual = lower_to_actual.get(alias.lower())
+            if actual is not None and actual not in mapping:
+                mapping[actual] = aliases[0]
+                break
+
+    if len(mapping) == len(expected):
+        return df.rename(columns=mapping)
+
+    if df.shape[1] < len(expected):
+        raise ValueError(f"The {name} data must have at least {len(expected)} columns "
+                         f"{canonical}, but only {df.shape[1]} were found: {list(df.columns)}.")
+    mapping = dict(zip(df.columns[:len(expected)], canonical))
+    report = ", ".join(f"'{src}' -> '{dst}'" for src, dst in mapping.items())
+    print(f"WARNING: {name} columns {canonical} not found by name. "
+          f"Using columns by position: {report}.")
+    return df.rename(columns=mapping)
+
+
 def _build_tree(parent_df, pops_df=None):
     """Create a dict-based tree where for each parent there is a list of children."""
     parents = parent_df["ParentId"].unique()
@@ -176,6 +209,9 @@ def process_data(pops_df, parent_df,
         list: List of colors
         int: Maximum population. None if not absolute
     """
+    pops_df = _match_columns(pops_df, [("Id", "ChildId"), ("Step",), ("Pop",)], "populations")
+    parent_df = _match_columns(parent_df, [("ParentId",), ("ChildId", "Id")], "parent_tree")
+
     min_step = pops_df["Step"].min()
     first_step = max(first_step, min_step) if first_step else min_step
 
