@@ -1,13 +1,21 @@
 import argparse
+from importlib.metadata import PackageNotFoundError, version
 
 import pandas as pd
 from matplotlib import pyplot as plt
 
 from .core import fish_plot, process_data, setup_figure
 
+try:
+    __version__ = version("pyfish")
+except PackageNotFoundError:
+    __version__ = "unknown"
+
+
 def run():
     parser = argparse.ArgumentParser(description='Create a Fish (Muller) plot '
                                                  'for the given evolutionary tree.')
+    parser.add_argument("--ver", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument("populations", type=str,
                         help="A CSV file with the header \"Id,Step,Pop\".")
     parser.add_argument("parent_tree", type=str,

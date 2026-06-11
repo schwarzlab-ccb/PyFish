@@ -9,7 +9,7 @@ def read(fname):
 
 setup(
     name="pyfish",
-    version="1.1.1",
+    version="1.2.0",
     author="Adam Streck, Tom L. Kaufmann",
     author_email="adam.streck@iccb-cologne.org",
     description="Plotting tool for evolutionary population dynamics. Creates a Fish (Muller) plot.",
