@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0] - 2026-06-11
+
+### Added
+- `--ver` option: prints the installed PyFish version and exits.
+- Automatic column matching for both input tables. Column names are matched case-insensitively, and `Id`/`ChildId` are interchangeable. If the names cannot be matched, columns are assigned by position and the chosen mapping is reported.
+- Self-parent roots: a node that lists itself as its own parent in the parent tree is treated as a root.
+
 ## [1.1.1] - 2026-04-23
 
 ### Fixed

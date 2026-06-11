@@ -79,6 +79,15 @@ An example parent tree:
 
 A synthetic root is always centered and has a width zero, even when using curved or separate modes.
 
+A node that lists itself as its own parent (`ParentId == ChildId`) is treated as a root.
+
+### Column names
+
+Column names are matched automatically:
+* Matching is case-insensitive (e.g. `ID`, `Step`, `POP` are all accepted).
+* `Id` and `ChildId` are interchangeable, so the populations `Id` column and the parent tree `ChildId` column may use either name.
+* If the expected names cannot be matched, columns are assigned by position (in the order given by the schema) and the mapping used is reported.
+
 ## Tool 
 
 We provide example data. From the root folder of the project call: 
@@ -217,6 +226,10 @@ By default, children emerge from the center of the parent.
 ### `-W, --width int+`, `-H, --height int+`
 
 Specifies the dimensions for the output image. The size is including the axes' labels.
+
+### `--ver`
+
+Prints the installed PyFish version and exits.
 
 ## Citation
 Please cite as: *Adam Streck, Tom L Kaufmann, Roland F Schwarz, SMITH: Spatially Constrained Stochastic Model for Simulation of Intra-Tumour Heterogeneity, Bioinformatics, 2023; https://doi.org/10.1093/bioinformatics/btad102*
