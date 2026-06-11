@@ -116,10 +116,15 @@ def _match_columns(df, expected, name):
 
 def _build_tree(parent_df, pops_df=None):
     """Create a dict-based tree where for each parent there is a list of children."""
+    # Nodes that list themselves as their own parent are treated as roots. Their
+    # self-referencing rows are dropped so they don't create cycles in the tree.
+    self_roots = parent_df.loc[parent_df["ParentId"] == parent_df["ChildId"], "ChildId"].unique()
+    parent_df = parent_df.loc[parent_df["ParentId"] != parent_df["ChildId"]]
+
     parents = parent_df["ParentId"].unique()
     children = parent_df["ChildId"].unique()
-    tree_ids = np.union1d(parents, children)
-    root_list = np.setdiff1d(parents, children)
+    tree_ids = np.union1d(np.union1d(parents, children), self_roots)
+    root_list = np.union1d(np.setdiff1d(parents, children), self_roots)
 
     # Find population IDs not mentioned in the parent tree at all
     if pops_df is not None:
