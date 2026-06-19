@@ -3,6 +3,8 @@
 
 [![PyPI](https://img.shields.io/pypi/v/pyfish?color=green)](https://pypi.org/project/pyfish/)
 [![Conda](https://img.shields.io/conda/v/bioconda/pyfish?color=green)](https://anaconda.org/bioconda/pyfish)
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/pyfish/badges/downloads.svg)](https://anaconda.org/bioconda/pyfish)
+[![Tests](https://github.com/ICCB-Cologne/PyFish/actions/workflows/tests.yml/badge.svg)](https://github.com/ICCB-Cologne/PyFish/actions/workflows/tests.yml)
 
 PyFish is a Python 3 package for creation of [Fish (Muller) plots](https://en.wikipedia.org/wiki/Muller_plot) like the one below.
 
@@ -14,7 +16,7 @@ PyFish is a Python 3 package for creation of [Fish (Muller) plots](https://en.wi
 
 PyFish can be used either as a stand-alone tool or as a plotting library.
 
-<img src="https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/fish.png" width="600" />
+<img src="https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/fish.png" width="600" />
 
 ## Installation
 
@@ -39,7 +41,7 @@ The program takes two tables:
 ### Populations
 
 Populations table has the schema `(Id: +int, Step: +int, Pop: +int)`, where:
-* `Id` is a numerical identifier of a subgroup`,
+* `Id` is a numerical identifier of a subgroup,
 * `Step` is a natural ordinal describing the logical time when the population is measured,
 * `Pop` is the size of the population of the subgroup at the given step.
 
@@ -74,8 +76,18 @@ An example parent tree:
 | 1        | 2       |
 | 0        | 3       | 
 
-**Note: there must be exactly one node in the parent tree that has no parent. This is the root (0 in the example above).**
+**Note: If multiple nodes have no parent, or if population IDs are not listed in the parent tree, a synthetic root with zero population is automatically created to parent them all.**
 
+A synthetic root is always centered and has a width zero, even when using curved or separate modes.
+
+A node that lists itself as its own parent (`ParentId == ChildId`) is treated as a root.
+
+### Column names
+
+Column names are matched automatically:
+* Matching is case-insensitive (e.g. `ID`, `Step`, `POP` are all accepted).
+* `Id` and `ChildId` are interchangeable, so the populations `Id` column and the parent tree `ChildId` column may use either name.
+* If the expected names cannot be matched, columns are assigned by position (in the order given by the schema) and the mapping used is reported.
 
 ## Tool 
 
@@ -90,6 +102,8 @@ Additional execution parameters are described below.
 ## Library
 
 The populations and parent_tree tables can be constructed directly as dataframes.
+
+A worked API example covering common options (raw, curved, separated, interpolated, and colormap comparison) is provided in [`example.ipynb`](example.ipynb).
 
 The library contains three public functions:
 
@@ -118,7 +132,7 @@ plt.show()
 
 Calling the above code displays the following image:
 
-<img src="https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/test.png" width="350" />
+<img src="https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/test.png" width="350" />
 
 ## Parameters
 
@@ -128,16 +142,27 @@ Plots absolute population counts at each step.
 
 | Base                          | --absolute                       |
 |-------------------------------|----------------------------------|
-| ![Base plot](https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/base.png) | ![Absolute plot](https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/abs.png) |
+| ![Base plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/base.png) | ![Absolute plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/abs.png) |
 
 ### `-I, --interpolate int`
 
-Fills in missing values by interpolation by a polynomial of the given degree. 
-If a value is not given, each population is set to 0 at the first and last step.
+Fills in missing values by interpolation.
+* A negative value (default) fills missing values with 0.
+* `0` uses linear interpolation between known data points.
+* A positive value uses polynomial (spline) interpolation of the given degree.
 
 | Base                          | --interpolate 2                                |
 |-------------------------------|------------------------------------------------|
-| ![Base plot](https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/test.png) | ![Interpolated plot](https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/interpolation.png) |
+| ![Base plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/test.png) | ![Interpolated plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/interpolation.png) |
+
+### `-V, --curved`
+
+Smooths the filled areas using piecewise Hermite interpolation, producing gentle S-curve transitions between steps.
+Also adds a gray background and centers the plot when the population is empty at the first step.
+
+| Base                          | --curved                          |
+|-------------------------------|-----------------------------------|
+| ![Base plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/test.png) | ![Curved plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/curved.png) |
 
 ### `-S, --smooth float`
 
@@ -147,9 +172,10 @@ The bigger the population the bigger the value should be.
 
 **NOTE: If the population values are sparse, using smoothing without interpolation might lead to misleading population sizes.**
 
+
 | Base                          | --smooth 50                         |
 |-------------------------------|-------------------------------------|
-| ![Base plot](https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/base.png) | ![Smoothed plot](https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/smooth.png) |
+| ![Base plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/base.png) | ![Smoothed plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/smooth.png) |
 
 ### `-F, --first int+`, `-L, --last int+`
 
@@ -157,7 +183,7 @@ Only limits the steps to the range `[first, last]` inclusive.
 
 | Base                          | --first 4000 --last 4500           |
 |-------------------------------|------------------------------------|
-| ![Base plot](https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/base.png) | ![Smoothed plot](https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/bound.png) |
+| ![Base plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/base.png) | ![Smoothed plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/bound.png) |
 
 ### `-M, --cmap string`
 
@@ -167,9 +193,9 @@ Default colormap is rainbow.
 
 | Base                          | --cmap viridis                   |
 |-------------------------------|----------------------------------|
-| ![Base plot](https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/base.png) | ![Smoothed plot](https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/map.png) |
+| ![Base plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/base.png) | ![Smoothed plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/map.png) |
 
-### `-C, --color_by string`
+### `-C, --color-by string`
 
 Color the ids based on a separate column in the populations.csv file.
 It will select the first value of the column per id, so the value should be constant for all entries with the same id.
@@ -178,7 +204,7 @@ Best combined with a sequential colormap using `--cmap`
 
 | Base                          | --color-by Feature --cmap viridis |
 |-------------------------------|-----------------------------------|
-| ![Base plot](https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/base.png) | ![Smoothed plot](https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/color_by.png) |
+| ![Base plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/base.png) | ![Smoothed plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/color_by.png) |
 
 
 ### `-R, --seed int+`
@@ -187,18 +213,31 @@ Specifies the seed for the randomization of colors.
 
 | Base                          | --seed 2022                       |
 |-------------------------------|-----------------------------------|
-| ![Base plot](https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/base.png) | ![Smoothed plot](https://bytebucket.org/schwarzlab/pyfish/raw/main/doc/seed.png) |
+| ![Base plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/base.png) | ![Smoothed plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/seed.png) |
+
+### `-E, --separate`
+
+Places children equidistant from each other within their parent band.
+By default, children emerge from the center of the parent.
+
+| Base                          | --separate                        |
+|-------------------------------|-----------------------------------|
+| ![Base plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/base.png) | ![Separate plot](https://raw.githubusercontent.com/ICCB-Cologne/PyFish/main/doc/separate.png) |
 
 ### `-W, --width int+`, `-H, --height int+`
 
 Specifies the dimensions for the output image. The size is including the axes' labels.
+
+### `--ver`
+
+Prints the installed PyFish version and exits.
 
 ## Citation
 Please cite as: *Adam Streck, Tom L Kaufmann, Roland F Schwarz, SMITH: Spatially Constrained Stochastic Model for Simulation of Intra-Tumour Heterogeneity, Bioinformatics, 2023; https://doi.org/10.1093/bioinformatics/btad102*
 
 ## Credits
 Authors: Adam Streck, Tom L. Kaufmann    
-Current contact: [Adam Streck](mailto:adam.streck@gmail.com?subject=PyFish)    
+Current contact: [Adam Streck](mailto:adam.streck@iccb-cologne.org?subject=PyFish)    
 Supervised by: Roland F. Schwarz
 
 ## License
@@ -208,4 +247,10 @@ PyFish is available under the MIT License.
 To actively develop the package, we recommend to install pyfish in development mode using pip `pip install -e . --user`.
 In order to run the main routine from the command line without installing it first, run `python -m pyfish.main -- tests/populations.csv tests/parent_tree.csv out.png`.
 
-To trigger testing, run `pytest -v .`.
+### Tests
+
+To trigger testing, run `pytest -v .` 
+
+### Docs
+
+To generate the docs, run `python ./tests/generate_doc_images.py` 
