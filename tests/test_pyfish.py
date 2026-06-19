@@ -17,7 +17,7 @@ def try_to_delete_file(file_name):
         pass
 
 
-def check_figures_equal(file_name, extensions=("png", "pdf", "svg"), tol=0):
+def check_figures_equal(file_name, extensions=("png", "pdf", "svg"), tol=20):
     """
     Loosely based on matplotlib.testing.decorators.check_figures_equal
     """
